@@ -4,9 +4,6 @@ class Crypto_Exec():
         self.size = 6
         self.padding = "A"
 
-    def convert_bin(self,value):
-
-
 
     def block_split(self,value):
         """
