@@ -57,10 +57,12 @@ class Mode():
 if __name__ == "__main__":
     mode = Mode()
     cb = Convert_Bin()
-    value = cb.convert_bin("Hello")
+    value = cb.convert_bin("*&*#JLJFLJFlasjlfj5362")
     test = mode.CBC_encrypto(value,15)
     atai = mode.CBC_decrypto(test,15)
     print(atai)
+    correct = cb.convert_str(atai)
+    print(correct)
 
 
     
