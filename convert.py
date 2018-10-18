@@ -1,5 +1,4 @@
 import binascii
-
 class Convert_Bin():
     def __init__(self):
         pass
@@ -24,4 +23,25 @@ class Convert_Bin():
             bin_l.append(bins)
 
         return bin_l
+
+    def convert_str(self,value):
+        """
+        数値を文字列に治す
+        args:
+            value -> list [] int
+                     ex) [14,65,35,35]
+
+        return:
+            original_string -> string
+                    ex) "Hello"
+
+            
+        """
+        original_l = []
+        for val in value:
+            original_l.append(chr(val))
+
+        original_string = "".join(original_l)
+
+        return original_string
 
