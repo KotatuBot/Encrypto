@@ -4,9 +4,15 @@ class Convert_Bin():
     def __init__(self):
         pass
 
-    def convert_bin(value):
+    def convert_bin(self,value):
         """
         文字列を倫理演算できるようにする.
+        args:
+            vaule -> String 
+                     ex) "Hello"
+        return:
+            bin_l -> list [] int
+                    ex) [14,56,78,36,5]
         """
         hex_value = binascii.hexlify(bytes(value.encode("utf-8")))
         count = len(hex_value)/2
