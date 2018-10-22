@@ -59,15 +59,18 @@ class Mode():
         return decrypto_list
 
     def CFB_encrypto(self,hira_value,IV):
+        """
+        CFBモードだめ
+        """
         encrypto_list = []
         for number,tip in enumerate(hira_value):
             if number == 0:
                 IV_en = self.encrypto(IV)
-                xor_result = IV_en^tip
+                xor_result = [i^t for(i,t) in zip(IV_en,tip)]
                 encrypto_list.append(xor_result)
             else:
                 encrypto_en = self.encrypto(encrypto_list[-1])
-                xor_result = encrypto_en^tip
+                xor_result = [en^t for(en,t) in zip(encrypto_en,tip)]
                 encrypto_list.append(xor_result)
         return encrypto_list
 
@@ -76,11 +79,11 @@ class Mode():
         for number,tip in enumerate(encrypto_value):
             if number == 0:
                 IV_de =  self.decrypto(IV)
-                xor_result = IV_de^tip
+                xor_result = [iv^t for(iv,t) in zip(IV_de,tip)]
                 decrypto_list.append(xor_result)
             else:
                 decrypto_de = self.decrypto(decrypto_list[-1])
-                decrypto_value = decrypto_de^tip
+                decrypto_value = [decry^t for(decry,t) in zip(decrypto_de,tip)]
                 decrypto_list.append(decrypto_value)
         return decrypto_list 
 
@@ -90,12 +93,12 @@ class Mode():
         for number,tip in enumerate(value):
             if number == 0:
                 IV_en = self.encrypto(IV)
-                xor_result = IV_en^tip
+                xor_result = [iv^t for(iv,t) in zip(IV_en,tip)]
                 value_list.append(xor_result)
                 stream_key = IV_en
             else:
                 stream_key = self.encrypto(stream_key)
-                xor_result = stream_key^tip
+                xor_result = [s^t for(s,t) in zip(stream_key,tip)]
                 value_list.append(xor_result)
         return value_list
 
