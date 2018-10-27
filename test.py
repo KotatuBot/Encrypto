@@ -1,6 +1,7 @@
 from convert import Convert
 from mode import Mode
 from crypto_exec import Crypto_Exec
+from key_create import Key_Create
 """
 test python
 """
@@ -8,44 +9,59 @@ test python
 def CBC_test1():
     mode = Mode()
     cb = Convert()
-    ce = Crypto_Exec()
-    string = "THISAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-    b = ce.block_split(string)
+    ce = Crypto_Exec(128)
+    string = "THISAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATTTTTTTTTTTTT"
+    # ブロック分割
+    b,padding = ce.block_split(string)
+    # intのリスト型に分割
     value = cb.convert_bin(b)
+    # paddingを付与
+    value = ce.block_add(value,padding)
     IV = "B"*16
+    # IV生成
     t = mode.IV_genrate(IV)
+    # 暗号化
     test = mode.CBC_encrypto(value,t)
+    # 復号
     atai = mode.CBC_decrypto(test,t)
+    # padding除去
+    ce.strip_padding(atai,padding)
+    # 文字列に直す
     correct = cb.convert_str(atai)
     print(correct)
 
 def CFB_test():
     mode = Mode()
     cb = Convert()
-    value = cb.convert_bin("*&*#JLJFLJFlasjlfj5362")
-    test = mode.CFB_encrypto(value,15)
-    print(test)
-    correct = mode.CFB_decrypto(test,15)
-    print(correct)
-    t = cb.convert_str(correct)
-    print(t)
+    ce = Crypto_Exec(128)
+    string = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    b = ce.block_split(string)
+    value = cb.convert_bin(b)
+    IV = "C"*16
+    t = mode.IV_genrate(IV)
+    testd = mode.CFB_encrypto(value,t)
+    correct = mode.CFB_decrypto(testd,t)
+    td = cb.convert_str(correct)
+    print(td)
 
 
 def OFB_test():
     mode = Mode()
     cb = Convert()
-    value = cb.convert_bin("*&*#JLJFLJFlasjlfj5362")
-    encrypto = mode.OFB_mode(value,15)
-    print(encrypto)
-    decrypto = mode.OFB_mode(encrypto,15)
-    print(decrypto)
+    ce = Crypto_Exec(128)
+    string = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    b = ce.block_split(string)
+    value = cb.convert_bin(b)
+    IV = "B"*16
+    t = mode.IV_genrate(IV)
+    encrypto = mode.OFB_mode(value,t)
+    decrypto = mode.OFB_mode(encrypto,t)
     t = cb.convert_str(decrypto)
-    print(t)
 
 def CTR_test():
     mode = Mode()
     cb = Convert()
-    ce = Crypto_Exec()
+    ce = Crypto_Exec(128)
     string = "This is your name eding "
     b = ce.block_split(string)
     c = cb.convert_bin(b)
@@ -56,6 +72,11 @@ def CTR_test():
     print("decrypto")
     test = cb.convert_str(v)
     print(test)
+
+def key_test():
+    kc = Key_Create()
+    b = kc.create_key(256)
+    print(b)
 
 
 

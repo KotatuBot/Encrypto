@@ -1,5 +1,5 @@
 import binascii
-class Convert_Bin():
+class Convert():
     def __init__(self):
         pass
 
@@ -13,16 +13,20 @@ class Convert_Bin():
             bin_l -> list [] int
                     ex) [14,56,78,36,5]
         """
-        hex_value = binascii.hexlify(bytes(value.encode("utf-8")))
-        count = len(hex_value)/2
+        bin_merge_l = []
+        for j in value:
+            j_string = "".join(j)
+            hex_value = binascii.hexlify(bytes(j_string.encode("utf-8")))
+            count = len(hex_value)/2
 
-        bin_l = []
-        for number in range(int(count)):
-            hex_str = "0x" + str(hex_value[number*2:(number+1)*2].decode("utf-8"))
-            bins = int(hex_str,base=16)
-            bin_l.append(bins)
+            bin_l = []
+            for number in range(int(count)):
+                hex_str = "0x" + str(hex_value[number*2:(number+1)*2].decode("utf-8"))
+                bins = int(hex_str,base=16)
+                bin_l.append(bins)
+            bin_merge_l.append(bin_l)
 
-        return bin_l
+        return bin_merge_l
 
     def convert_str(self,value):
         """
@@ -37,11 +41,14 @@ class Convert_Bin():
 
             
         """
-        original_l = []
-        for val in value:
-            original_l.append(chr(val))
+        original_string = ""
+        for s_value in value:
+            original_l = []
+            for val in s_value:
+                original_l.append(chr(val))
 
-        original_string = "".join(original_l)
+            tmp_string = "".join(original_l)
+            original_string += tmp_string
 
         return original_string
 
