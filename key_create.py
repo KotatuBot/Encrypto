@@ -79,33 +79,40 @@ class Key_Create():
         return result
 
 
+    def genrate_key(self,bitsd):
+        """
+        鍵のストリームを作成する
+        """
+        if bitsd == 128:
+            rounds = 4*10-4
+        # test = kc.create_key(128)
+        key = [[189,59,153,48],[24,75,106,221],[137,24,86,243],[61,227,5,157]]
+        counter = 0
+        key_list = []
+        for count in range(rounds):
+            convert_key = np.array(key)
+            tip = convert_key[:,-1]
+            if count % 4 == 0:
+                tmp = []
+                row_tip = self.row_word(tip)
+                word = self.sub_bytes(row_tip)
+                origin = convert_key[:,count]
+                recon = self.recons[:,counter]
+                xor_result = self.xor_three(origin,word,recon)
+                counter += 1
+                tmp.append(key[0][4*(counter-1):4*counter])
+                tmp.append(key[1][4*(counter-1):4*counter])
+                tmp.append(key[2][4*(counter-1):4*counter])
+                tmp.append(key[3][4*(counter-1):4*counter])
+                key_list.append(tmp)
+            else:
+                word = tip
+                origin = convert_key[:,count]
+                xor_result = self.xor_two(origin,word)
+            # appending
+            for number in range(len(key)):
+                key[number].append(xor_result[number])
+        print(key_list)
 
 kc = Key_Create()
-# test = kc.create_key(128)
-t = [[189,59,153,48],[24,75,106,221],[137,24,86,243],[61,227,5,157]]
-counter = 0
-key_list = []
-for count in range(4*10-4):
-    d = np.array(t)
-    e = d[:,-1]
-    if count % 4 == 0:
-        tmp = []
-        es = kc.row_word(e)
-        word = kc.sub_bytes(es)
-        origin = d[:,count]
-        recon = kc.recons[:,counter]
-        sd = kc.xor_three(origin,word,recon)
-        counter += 1
-        tmp.append(t[0][4*(counter-1):4*counter])
-        tmp.append(t[1][4*(counter-1):4*counter])
-        tmp.append(t[2][4*(counter-1):4*counter])
-        tmp.append(t[3][4*(counter-1):4*counter])
-        key_list.append(tmp)
-    else:
-        word = e
-        origin = d[:,count]
-        sd = kc.xor_two(origin,word)
-    # appending
-    for s in range(len(t)):
-        t[s].append(sd[s])
-print(key_list)
+kc.genrate_key(128)
