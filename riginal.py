@@ -95,22 +95,36 @@ def AddRoundKey(value,keys):
     return encrypto
 
 def main():
+    Round = 10
     a = [["0x19","0xa0","0x9a","0xe9"],["0x3d","0xf4","0xc6","0xf8"],["0xe3","0xe2","0x8d","0x48"],["0xbe","0x2b","0x2a","0x08"]]
     for n1,j in enumerate(a):
         for n2,i in enumerate(j):
             a[n1][n2] = int(i,16)
 
-    # Bytes 
-    affter_byte = SubBytes(a)
-    # Rows
-    affter_row = ShiftRow(affter_byte)
-    # Mixcolumns
-    affter_column = Mixcolumn(affter_row)
-    # Keycreate
-    key_round = kc.create_key(128)
-    # 
-    t = AddRoundKey(affter_column,key_round)
-    print(t)
+    # keystream
+    key_listd = kc.genrate_key(128)
+
+    for rounds in range(Round):
+        if rounds == 0 :
+            # Keycreate
+            a = AddRoundKey(affter_column,keylistd[rounds+1])
+        elif rounds == Round -1 :
+            # Bytes 
+            affter_byte = SubBytes(a)
+            # Rows
+            affter_row = ShiftRow(affter_byte)
+            # Keycreate
+            a = AddRoundKey(affter_row,keylistd[rounds+1])
+
+        else:
+            # Bytes 
+            affter_byte = SubBytes(a)
+            # Rows
+            affter_row = ShiftRow(affter_byte)
+            # Mixcolumns
+            affter_column = Mixcolumn(affter_row)
+            # Keycreate
+            a = AddRoundKey(affter_column,keylistd[rounds+1])
     
 main()
 
