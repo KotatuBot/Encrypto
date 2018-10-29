@@ -1,5 +1,7 @@
 import numpy as np
 from key_create import Key_Create
+from mixcolumns import Mixcolumns
+
 sbox = [
         [0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76],
         [0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0],
@@ -38,16 +40,8 @@ sboxInv = [
         [0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d],
         ]
 
-mix_column_table = [
-        [0x02,0x03,0x01,0x01],
-        [0x01,0x02,0x03,0x01],
-        [0x01,0x01,0x02,0x03],
-        [0x03,0x01,0x01,0x02],
-        ]
-
 sbox_array = np.array(sbox)
 sboxInv_array = np.array(sboxInv)
-mix_array = np.array(mix_column_table)
 kc = Key_Create()
 
 def ShiftRow(np_array):
@@ -88,34 +82,36 @@ def InvSubBytes(plain_array):
             plain_array[j][i] = sboxInv_array[up_number,down_number]
     return plain_array
 
-def MixColumns(value):
-    row_test = value[:,2]
-    row_array = np.reshape(row_test,(4,1))
-    e = np.dot(value,row_array)
-    test = int('100011011',2)
-    print(test)
-    print(len(bin(e[0,0])))
+def Mixcolumn(affter_row):
+    mc = Mixcolumns()
+    for s in range(len(affter_row)):
+        convert_vect = mc.main(affter_row[:,s])
+        affter_row[:,s] = convert_vect
 
+    return affter_row
 
 def AddRoundKey(value,keys):
     encrypto = np.bitwise_xor(value,keys)
     return encrypto
 
 def main():
-    a = [[21,45,68,56],[21,24,35,46],[19,24,35,46],[21,45,68,56]]
-    print(a)
-    b = SubBytes(a)
-    c = ShiftRow(b)
-    MixColumns(c)
+    a = [["0x19","0xa0","0x9a","0xe9"],["0x3d","0xf4","0xc6","0xf8"],["0xe3","0xe2","0x8d","0x48"],["0xbe","0x2b","0x2a","0x08"]]
+    for n1,j in enumerate(a):
+        for n2,i in enumerate(j):
+            a[n1][n2] = int(i,16)
+
+    # Bytes 
+    affter_byte = SubBytes(a)
+    # Rows
+    affter_row = ShiftRow(affter_byte)
+    # Mixcolumns
+    affter_column = Mixcolumn(affter_row)
+    # Keycreate
     key_round = kc.create_key(128)
-    t = AddRoundKey(c,key_round)
-    """
+    # 
+    t = AddRoundKey(affter_column,key_round)
     print(t)
-    d = AddRoundKey(t,key_round)
-    e = InvShiftRow(d)
-    j = InvSubBytes(e)
-    print(j)
-    """
+    
 main()
 
 
