@@ -1,6 +1,7 @@
 import numpy as np
 from key_create import Key_Create
 from mixcolumns import Mixcolumns
+from formats import Formats
 
 sbox = [
         [0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76],
@@ -90,42 +91,96 @@ def Mixcolumn(affter_row):
 
     return affter_row
 
+def InvMixcolumns(affter_row):
+    mc = Mixcolumns()
+    for s in range(len(affter_row)):
+        convert_vect = mc.inv_main(affter_row[:,s])
+        affter_row[:,s] = convert_vect
+
+    return affter_row
+
+
 def AddRoundKey(value,keys):
     encrypto = np.bitwise_xor(value,keys)
     return encrypto
 
-def main():
-    Round = 10
-    a = [["0x19","0xa0","0x9a","0xe9"],["0x3d","0xf4","0xc6","0xf8"],["0xe3","0xe2","0x8d","0x48"],["0xbe","0x2b","0x2a","0x08"]]
-    for n1,j in enumerate(a):
-        for n2,i in enumerate(j):
-            a[n1][n2] = int(i,16)
+def encrypto(key_len,state):
 
+    fs = Formats()
+    if key_len == 128:
+        Round = 10
+    elif key_len == 192:
+        Round = 12
+    else:
+        pass
     # keystream
-    key_listd = kc.genrate_key(128)
-
-    for rounds in range(Round):
+    key_listd = kc.genrate_key(key_len)
+    for rounds in range(Round+1):
         if rounds == 0 :
             # Keycreate
-            a = AddRoundKey(affter_column,keylistd[rounds+1])
-        elif rounds == Round -1 :
+            state = AddRoundKey(state,key_listd[rounds])
+        elif rounds == Round:
             # Bytes 
-            affter_byte = SubBytes(a)
+            affter_byte = SubBytes(state)
             # Rows
             affter_row = ShiftRow(affter_byte)
             # Keycreate
-            a = AddRoundKey(affter_row,keylistd[rounds+1])
+            state = AddRoundKey(affter_row,key_listd[rounds])
 
         else:
             # Bytes 
-            affter_byte = SubBytes(a)
+            affter_byte = SubBytes(state)
             # Rows
             affter_row = ShiftRow(affter_byte)
             # Mixcolumns
             affter_column = Mixcolumn(affter_row)
             # Keycreate
-            a = AddRoundKey(affter_column,keylistd[rounds+1])
-    
+            state = AddRoundKey(affter_column,key_listd[rounds])
+            # Printing
+            print("encrypto")
+            print("Round"+str(rounds+1))
+            print(fs.pint_hex(state))
+
+    return state,key_listd
+
+def decrypto(key_len,state,key_listd):
+    if key_len == 128:
+        Round = 10
+    elif key_len == 192:
+        Round = 12
+    else:
+        pass
+
+    for rounds in range(Round+1):
+        if rounds == 0 :
+            # Keycreate
+            a = AddRoundKey(state,key_listd[rounds])
+        elif rounds == Round:
+            affter_rows = InvShiftRow(state)
+            affter_byte = InvSubBytes(affter_row)
+            state = AddRoundKey(affter_row,key_listd[rounds])
+                                                              
+        else:
+            affter_row = InvShiftRow(state)
+            affter_byte = InvSubBytes(affter_row)
+            affter_column = InvMixcolumns(affter_byte)
+            # Keycreate
+            state = AddRoundKey(affter_column,key_listd[rounds])
+
+    return state
+
+def main():
+    fs = Formats()
+    state = [["0x32","0x88","0x31","0xe0"],["0x43","0x5a","0x31","0x37"],["0xf6","0x30","0x98","0x07"],["0xa8","0x8d","0xa2","0x34"]]
+    state = fs.phex_int(state)
+
+    encrypto_state,keys= encrypto(128,state)
+    print("Output")
+    print(encrypto_state)
+    decrypto_state = decrypto(128,encrypto_state,keys)
+    fs.pint_hex(decrypto_state)
+
+   
 main()
 
 

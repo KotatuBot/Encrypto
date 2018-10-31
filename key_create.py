@@ -1,4 +1,5 @@
 from Crypto import Random
+from formats import Formats
 import numpy as np
 
 class Key_Create():
@@ -22,17 +23,35 @@ class Key_Create():
         [0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16],
         ]
 
-        recon = [ ["0x01", "0x02", "0x04", "0x08", "0x10", "0x20", "0x40", "0x80", "0x1b", "0x36"],
-                       ["0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00"],
-                        ["0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00"],
-                        ["0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00"],
+        recon = [ ["0x01", "0x02", "0x04", "0x08", "0x10", "0x20", "0x40", "0x80", "0x1b", "0x36","0x6c","0xd8","0xab"],
+                  ["0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00","0x00","0x00","0x00"],
+                  ["0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00","0x00","0x00","0x00"],
+                  ["0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00","0x00","0x00","0x00"],
                         ]
 
 
         self.sbox = np.array(sbox_array)
         self.recons = np.array(recon)
 
+    def create_rcon(self,byte):
+        recons_list = []
+        if byte=="128":
+            rounds = 10
+            victer = 4
+        else:
+            rounds = 12
+        recon_list = ["0x01"]
+        zero_list = ["0x00"]
+        for j in range(rounds):
+            numbers = int(recon_list[-1],16)
+            number2 = hex(numbers*2)
+            recon_list.append(number2)
+            zero_list.append("0x00")
+        recons_list.append(recon_list)
 
+        for i in range(victer-1):
+            recons_list.append(zero_list)
+        print(recons_list)
 
 
     def sub_bytes(self,plain_array):
@@ -80,16 +99,24 @@ class Key_Create():
 
 
     def genrate_key(self,bitsd):
+        fs = Formats()
         """
         鍵のストリームを作成する
         """
         if bitsd == 128:
-            rounds = 4*10-4
+            rounds = 4*10
+        elif bitsd == 192:
+            rounds = 4*12
+
+        else:
+            pass
         # test = kc.create_key(128)
-        key = [[189,59,153,48],[24,75,106,221],[137,24,86,243],[61,227,5,157]]
+
+        key = [["0x2b","0x28","0xab","0x09"],["0x7e","0xae","0xf7","0xcf"],["0x15","0xd2","0x15","0x4f"],["0x16","0xa6","0x88","0x3c"]]
+        key = fs.phex_int(key)
         counter = 0
         key_list = []
-        for count in range(rounds):
+        for count in range(rounds+1):
             convert_key = np.array(key)
             tip = convert_key[:,-1]
             if count % 4 == 0:
@@ -100,10 +127,11 @@ class Key_Create():
                 recon = self.recons[:,counter]
                 xor_result = self.xor_three(origin,word,recon)
                 counter += 1
-                tmp.append(key[0][4*(counter-1):4*counter])
-                tmp.append(key[1][4*(counter-1):4*counter])
-                tmp.append(key[2][4*(counter-1):4*counter])
-                tmp.append(key[3][4*(counter-1):4*counter])
+                tmp.append(key[0][4*(counter-1):4*(counter)])
+                tmp.append(key[1][4*(counter-1):4*(counter)])
+                tmp.append(key[2][4*(counter-1):4*(counter)])
+                tmp.append(key[3][4*(counter-1):4*(counter)])
+                #fs.pint_hex(tmp)
                 key_list.append(tmp)
             else:
                 word = tip
@@ -112,7 +140,9 @@ class Key_Create():
             # appending
             for number in range(len(key)):
                 key[number].append(xor_result[number])
-        print(key_list)
 
-kc = Key_Create()
-kc.genrate_key(128)
+        return key_list
+
+if __name__ == "__main__":
+    kc = Key_Create()
+    d = kc.genrate_key(128)
